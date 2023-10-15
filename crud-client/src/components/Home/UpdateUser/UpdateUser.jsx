@@ -1,56 +1,32 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLoaderData } from "react-router-dom";
 
-const CreateUser = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const navigate = useNavigate();
-  const backHome = () => {
-    navigate(-1);
-  };
+const UpdateUser = () => {
+  const user = useLoaderData();
+  const [name, setName] = useState(user?.name || "");
+  const [email, setEmail] = useState(user?.email || "");
   const handleSubmit = (e) => {
     e.preventDefault();
-    const user = {
-      name,
-      email,
-    };
-    fetch("http://localhost:5000/users", {
-      method: "POST",
+    const newUser = { name, email };
+    fetch(`http://localhost:5000/users/${user._id}`, {
+      method: "PUT",
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify(user),
+      body: JSON.stringify(newUser),
     })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Request failed with status: ${res.status}`);
-        }
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((data) => {
-        if (data.insertedId) {
-          alert("User Create ");
+        if (data.modifiedCount > 0) {
+          alert("User Update ");
           setName("");
           setEmail("");
-        } else {
-          alert("Try With Valid data");
         }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
       });
   };
+
   return (
-    <div className="container w-1/2 mx-auto shadow-sm p-4 mt-8">
-      <h1 className="font-bold mb-3">Create New User</h1>
-      <div className="flex justify-end">
-        <button
-          onClick={backHome}
-          className="btn bg-red-500 py-3 px-4 rounded text-white"
-        >
-          Back Home
-        </button>
-      </div>
+    <div className="container w-full lg:w-1/3 mx-auto mt-8">
       <form onSubmit={handleSubmit}>
         <label className="block text-sm font-medium leading-6 text-gray-900">
           Name
@@ -83,7 +59,7 @@ const CreateUser = () => {
             type="submit"
             className="btn bg-blue-500 py-3 px-4 rounded text-white"
           >
-            Add User
+            Update
           </button>
         </div>
       </form>
@@ -91,4 +67,4 @@ const CreateUser = () => {
   );
 };
 
-export default CreateUser;
+export default UpdateUser;
